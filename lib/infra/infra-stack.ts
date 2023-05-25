@@ -508,6 +508,26 @@ export class InfraStack extends Stack {
           ignoreErrors: false,
         }));
     } else {
+      cfnInitConfig.push(InitCommand.shellCommand('set -ex;cd opensearch; echo "y"|sudo -u ec2-user bin/opensearch-plugin install repository-s3', {
+        cwd: '/home/ec2-user',
+        ignoreErrors: false,
+      }));
+      const securityConfig: any = load(readFileSync(`${configFileDir}/config.yml`, 'utf-8'));
+      const roles: any = load(readFileSync(`${configFileDir}/roles.yml`, 'utf-8'));
+      const rolesMapping: any = load(readFileSync(`${configFileDir}/roles_mapping.yml`, 'utf-8'));
+      cfnInitConfig.push(InitCommand.shellCommand(`set -ex;cd opensearch; echo "${dump(securityConfig)}" > config/opensearch-security/config.yml`, {
+        cwd: '/home/ec2-user',
+        ignoreErrors: false,
+      }));
+      cfnInitConfig.push(InitCommand.shellCommand(`set -ex;cd opensearch; echo "${dump(roles)}" > config/opensearch-security/roles.yml`, {
+        cwd: '/home/ec2-user',
+        ignoreErrors: false,
+      }));
+      // eslint-disable-next-line max-len
+      cfnInitConfig.push(InitCommand.shellCommand(`set -ex;cd opensearch; echo "${dump(rolesMapping)}" > config/opensearch-security/roles_mapping.yml`, {
+        cwd: '/home/ec2-user',
+        ignoreErrors: false,
+      }));
       cfnInitConfig.push(InitCommand.shellCommand('set -ex;cd opensearch; sudo -u ec2-user nohup ./opensearch-tar-install.sh >> install.log 2>&1 &',
         {
           cwd: '/home/ec2-user',
@@ -523,6 +543,12 @@ export class InfraStack extends Stack {
         ignoreErrors: false,
       }));
 
+      // eslint-disable-next-line max-len
+      cfnInitConfig.push(InitCommand.shellCommand('set -ex;cd opensearch-dashboards;echo "opensearch_security.auth.anonymous_auth_enabled: true" >> config/opensearch_dashboards.yml',
+        {
+          cwd: '/home/ec2-user',
+          ignoreErrors: false,
+        }));
       cfnInitConfig.push(InitCommand.shellCommand('set -ex;cd opensearch-dashboards;echo "server.host: 0.0.0.0" >> config/opensearch_dashboards.yml',
         {
           cwd: '/home/ec2-user',
