@@ -549,6 +549,15 @@ export class InfraStack extends Stack {
           cwd: '/home/ec2-user',
           ignoreErrors: false,
         }));
+      // eslint-disable-next-line max-len
+      cfnInitConfig.push(InitCommand.shellCommand('set -ex;cd opensearch-dashboards;'
+          + 'sed -i /^opensearch_security.cookie.secure/d config/opensearch_dashboards.yml;'
+          + 'echo "opensearch_security.cookie.secure: true" >> config/opensearch_dashboards.yml;'
+          + 'echo "opensearch_security.cookie.isSameSite: None" >> config/opensearch_dashboards.yml',
+      {
+        cwd: '/home/ec2-user',
+        ignoreErrors: false,
+      }));
       cfnInitConfig.push(InitCommand.shellCommand('set -ex;cd opensearch-dashboards;echo "server.host: 0.0.0.0" >> config/opensearch_dashboards.yml',
         {
           cwd: '/home/ec2-user',
